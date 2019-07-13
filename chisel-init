@@ -1,22 +1,71 @@
 #!/bin/bash
 
-TEMPLATE_NAME="chisel-template"
-if [ ! -z "$1" ]; then    
-    TEMPLATE_NAME=$1
-fi
+CLONE_URL=git@github.com:freechipsproject/chisel-template.git
+TEMP_NAME=$(cat /dev/urandom | tr -cd 'a-zA-Z0-9' | head -c 32)
+PROGNAME=$(basename $0)
 
-if [ -e $TEMPLATE_NAME ]; then
-    echo "$TEMPLATE_NAME is already exists"
+usage() {
+    echo "Usage: $PROGNAME [OPTIONS] DIR_NAME"
+    echo 
+    echo "Options:"
+    echo "-h, --help: show this"
+    echo "     --ssh: use ssh to clone chisel-template repository"
+    echo "   --https: use https to clone chisel-template repository"
+    echo 
     exit 1
-fi
+}
 
-git clone git@github.com:freechipsproject/chisel-template.git $TEMPLATE_NAME
+while (( $# > 0 ))
+do
+    case "$1" in
+        "-h" | "--help" )
+            usage
+            exit 1
+            ;;
+        "--ssh" )
+            CLONE_URL=git@github.com:freechipsproject/chisel-template.git
+            shift 1
+            ;;
+        "--https" )
+            CLONE_URL=https://github.com/freechipsproject/chisel-template.git
+            shift 1
+            ;;
+        *)
+            TEMPLATE_NAME="$TEMPLATE_NAME $1"
+            shift 1
+            ;;
+    esac
+done
 
-if [ $? -eq 0 ]; then
-    rm -rf ./$TEMPLATE_NAME/.git ./$TEMPLATE_NAME/src/{main,test}/scala/gcd
-    cd ./$TEMPLATE_NAME && git init
-    
-    exit 0
+if [ -z "$TEMPLATE_NAME" ]; then
+    echo "specify project name"
+    exit 1
 else
-    exit 1
+    git clone "$CLONE_URL" $TEMP_NAME
+    
+    if [ $? -ne 0 ]; then
+        exit 1
+    fi       
 fi
+
+EXECUTE_DIR=$PWD
+for NAME in $TEMPLATE_NAME; do
+    cd $EXECUTE_DIR
+
+    if [ -e "$NAME" ]; then
+      echo "$NAME has already existed"  
+    else
+        cp -rf ./$TEMP_NAME ./$NAME
+        rm -rf ./$NAME/.git 
+        rm -rf ./$NAME/src/{main,test}/scala/gcd
+        cd ./$NAME 
+        git init        
+    fi
+done
+
+cd $EXECUTE_DIR
+rm -rf ./$TEMP_NAME
+
+
+
+
