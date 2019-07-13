@@ -1,0 +1,22 @@
+#!/bin/bash
+
+TEMPLATE_NAME="chisel-template"
+if [ ! -z "$1" ]; then    
+    TEMPLATE_NAME=$1
+fi
+
+if [ -e $TEMPLATE_NAME ]; then
+    echo "$TEMPLATE_NAME is already exists"
+    exit 1
+fi
+
+git clone git@github.com:freechipsproject/chisel-template.git $TEMPLATE_NAME
+
+if [ $? -eq 0 ]; then
+    rm -rf ./$TEMPLATE_NAME/.git ./$TEMPLATE_NAME/src/{main,test}/scala/gcd
+    cd ./$TEMPLATE_NAME && git init
+    
+    exit 0
+else
+    exit 1
+fi
