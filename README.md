@@ -1,6 +1,6 @@
 # chisel-init
 
-This shell script using [chisel-template](https://github.com/freechipsproject/chisel-template) works chisel project initialization.
+This shell script using [chisel-template](https://github.com/freechipsproject/chisel-template) to initialize chisel3 project
 
 ## how to use
 
